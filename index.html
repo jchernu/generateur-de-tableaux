@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons' rel="stylesheet">
+	<link href="https://unpkg.com/vuetify/dist/vuetify.min.css" rel="stylesheet">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+</head>
+<body>
+	<div id="app">
+		<v-app>
+			<v-content>
+				<v-container fluid fill-height>
+					<v-layout align-center justify-center>
+						<v-flex xs12 sm8 md4>
+							<v-card class="elevation-12">
+								<v-toolbar align-center justify-center dark color="primary">
+									<v-toolbar-title >Générateur de Tableaux</v-toolbar-title>
+								</v-toolbar>
+								<v-card-text style="text-align: center;" ondrop="drop_handler(event);" ondragenter="dragenter_handler(event);" ondragleave="dragleave_handler(event);" ondragover="allowDrop(event);">
+									<v-icon v-bind:color="iconColor" >file_upload</v-icon>
+									<br>
+									Déposez le fichier ici
+									<br>
+									<v-btn v-bind:download="fnameBtn" v-bind:href="hrefBtn" v-bind:disabled="disableBtn" color="primary">Télécharger</v-btn>
+								</v-card-text>
+							</v-card>
+						</v-flex>
+					</v-layout>
+				</v-container>
+			<v-content>
+		</v-app>
+	</div>
+
+	<script src="https://unpkg.com/vue/dist/vue.js"></script>
+	<script src="https://unpkg.com/vuetify/dist/vuetify.js"></script>
+	<script>
+		function sortScore(line) {
+			return parseInt(line.cat.charCodeAt(0) + '' + line.cat.charCodeAt(1) + '' + line.cat.charCodeAt(2) + '' + line.date.split('/')[2] + '' + line.date.split('/')[1] + '' + line.date.split('/')[0]);
+		}
+		function allowDrop(e) {
+			e.preventDefault();
+		}
+		function drop_handler(e) {
+			e.preventDefault();
+			app.iconColor = '';
+			app.fnameBtn = 'format_' + e.dataTransfer.files[0].name + (e.dataTransfer.files[0].name.endsWith('csv') ? '' : '.csv');
+			var file = e.dataTransfer.files[0],
+				reader = new FileReader();
+			reader.onload = function(event) {
+				app.fileContent = event.target.result;
+				try {
+					var result = [];
+					var lines = event.target.result.split('\n');
+					for (let i in lines) {
+						if (i == 0 || i == lines.length - 1) continue;
+						var line = lines[i].split('	');
+						result.push({
+							date: line[1],
+							client: line[4],
+							cat: line[15],
+							com: line[16],
+							total_ht: line[20]
+						});
+					}
+					result.sort((a, b) => { return sortScore(a) - sortScore(b); });
+					var file_output = lines[0].split('	')[1] + '	' + lines[0].split('	')[4] + '	' + lines[0].split('	')[15] + '	' + lines[0].split('	')[16] + '	' + lines[0].split('	')[20] + '\n' + result.map((item, index) => {
+						return item.date + '	' + item.client + '	' + item.cat + '	' + item.com + '	' + item.total_ht;
+					}).join('\n') + '\n' + lines[lines.length - 1].split('	')[1] + '	' + lines[lines.length - 1].split('	')[4] + '	' + lines[lines.length - 1].split('	')[15] + '	' + lines[lines.length - 1].split('	')[16] + '	' + lines[lines.length - 1].split('	')[20];
+					app.hrefBtn = 'data:text/plain;charset=utf-8,' + encodeURIComponent(file_output);
+					app.disableBtn = false;
+				} catch(ex) {
+					console.log(ex);
+				}
+			};
+			reader.readAsText(file);
+			return false;
+		}
+		function dragenter_handler(event) {
+			app.iconColor = 'primary';
+		}
+		function dragleave_handler(event) {
+			app.iconColor = '';
+		}
+		var app = new Vue({
+			el: '#app',
+			data: {
+				iconColor: '',
+				fileContent: '',
+				disableBtn: true,
+				hrefBtn: '',
+				fnameBtn: ''
+			}
+		});
+	</script>
+</body>
+</html>
