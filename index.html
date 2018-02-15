@@ -63,9 +63,9 @@
 						});
 					}
 					result.sort((a, b) => { return sortScore(a) - sortScore(b); });
-					var file_output = lines[0].split('	')[1] + '	' + lines[0].split('	')[4] + '	' + lines[0].split('	')[15] + '	' + lines[0].split('	')[16] + '	' + lines[0].split('	')[20] + '\n' + result.map((item, index) => {
-						return item.date + '	' + item.client + '	' + item.cat + '	' + item.com + '	' + item.total_ht;
-					}).join('\n') + '\n' + lines[lines.length - 1].split('	')[1] + '	' + lines[lines.length - 1].split('	')[4] + '	' + lines[lines.length - 1].split('	')[15] + '	' + lines[lines.length - 1].split('	')[16] + '	' + lines[lines.length - 1].split('	')[20];
+					var file_output = '"' + lines[0].split('	')[1] + '","' + lines[0].split('	')[4] + '","' + lines[0].split('	')[15] + '","' + lines[0].split('	')[16] + '","' + lines[0].split('	')[20].trim() + '"\n' + result.map((item, index) => {
+						return '"' + item.date.trim() + '","' + item.client.trim() + '","' + item.cat.trim() + '","' + item.com.trim() + '","' + item.total_ht.trim() + '"';
+					}).join('\n') + '\n"' + lines[lines.length - 1].split('	')[1] + '","' + lines[lines.length - 1].split('	')[4] + '","' + lines[lines.length - 1].split('	')[15] + '","' + lines[lines.length - 1].split('	')[16] + '","' + lines[lines.length - 1].split('	')[20].trim() + '"';
 					app.hrefBtn = 'data:text/plain;charset=utf-8,' + encodeURIComponent(file_output);
 					app.disableBtn = false;
 				} catch(ex) {
